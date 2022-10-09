@@ -1,13 +1,14 @@
 ---
-- name: Application deployment automation
+- name: "Trigger Jenkins Job"
   hosts: localhost
-  become: no
   gather_facts: false
   tasks:
-    - name: "Package spring boot application"
-      shell: cd .. && mvn clean package 
-      register:  mvn_pkg_out
-      tags: mvn_package
-    - debug:
-        var: mvn_pkg_out.stdout_lines
-      tags: mvn_package 
+    - name: "Trigger Jenkins URL"
+      uri:
+        url: "http://{{ jenkins.host }}/job/{{ jenkins.job }}/build?token={{ jenkins.token }}"
+        method: GET
+        user: "{{ jenkins.user }}"
+        password: "{{ jenkins.password }}"
+        force_basic_auth: true
+        status_code: 201
+

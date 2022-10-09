@@ -1,0 +1,10 @@
+
+{
+    "jenkins": '{
+      "host": "192.168.29.198:8080",
+      "job": "ansible-pipeline",
+      "token": "token123**",
+      "user": "ansible-user",
+      "password": "P@ssw0rd"
+    }'
+  }

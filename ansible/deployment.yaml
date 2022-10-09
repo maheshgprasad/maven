@@ -1,0 +1,22 @@
+---
+- name: "deploy package to app server"
+  hosts: tomcat_servers
+  become: yes
+  become_user: ansible-user
+  gather_facts: false
+  tasks:
+    - name: "Stop Tomcat Server"
+      systemd: 
+        name: tomcat
+        state: stopped
+        enabled: true
+      tags: package_deploy
+    - name: "Deploy update to application"
+      shell: #rsync command to the exact location
+      tags: package_deploy
+    - name: "Restart tomcat server"
+      systemd:
+        name: tomcat
+        state: started
+        enabled: yes
+      tags: package_deploy

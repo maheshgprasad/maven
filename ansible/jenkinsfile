@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/feature']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-token', url: 'https://github.com/maheshgprasad/maven.git/']]])
+            }
+        }
+        stage('Package Application') {
+            steps {
+                sh ''' mvn clean package '''
+            }
+        }
+        stage(' Generate Report ') {
+            steps {
+                sh ''' mvn surefire-report:report '''
+            }
+        }
+    }
+}

@@ -1,0 +1,3 @@
+[tomcat_servers]
+Jenkins ansible_host=
+APP_1 ansible_host=

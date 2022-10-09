@@ -1,0 +1,14 @@
+---
+- name: "Trigger Jenkins Job"
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: "Trigger Jenkins URL"
+      uri:
+        url: "http://{{ jenkins.host }}/job/{{ jenkins.job }}/build?token={{ jenkins.token }}"
+        method: GET
+        user: "{{ jenkins.user }}"
+        password: "{{ jenkins.password }}"
+        force_basic_auth: true
+        status_code: 201
+

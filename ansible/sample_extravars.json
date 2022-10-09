@@ -1,0 +1,9 @@
+{
+    "jenkins": '{
+      "host": "http://jenkins.example.com",
+      "job": "myJenkinsJob",
+      "token": "token123**",
+      "user": "automationUser",
+      "password": "SomeRand0mP@ssw0rd"
+    }'
+  }

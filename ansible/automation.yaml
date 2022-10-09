@@ -1,7 +1,7 @@
 ---
 - name: Application deployment automation
   hosts: localhost
-  become: yes
+  become: no
   become_user: mahesh
   gather_facts: false
   tasks:

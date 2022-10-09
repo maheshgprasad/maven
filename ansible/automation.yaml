@@ -2,11 +2,12 @@
 - name: Application deployment automation
   hosts: localhost
   become: no
-  become_user: mahesh
   gather_facts: false
   tasks:
     - name: "Package spring boot application"
       shell: cd .. && mvn clean package 
       register:  mvn_pkg_out
+      tags: mvn_package
     - debug:
         var: mvn_pkg_out.stdout_lines
+      tags: mvn_package 

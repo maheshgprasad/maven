@@ -1,10 +1,12 @@
 ---
 - name: Application deployment automation
-  hosts: tomcat_servers
+  hosts: localhost
   become: yes
-  become_user: ansible-user
+  become_user: mahesh
   gather_facts: false
   tasks:
-    - name: 
-      shell: 
-      register:  
+    - name: "Package spring boot application"
+      shell: mvn clean package
+      register:  mvn_out
+      debug:
+        msg: {{ mvn_out }}

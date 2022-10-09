@@ -6,7 +6,7 @@
   gather_facts: false
   tasks:
     - name: "Package spring boot application"
-      shell: mvn clean package
-      register:  mvn_out
-      debug:
-        msg: {{ mvn_out }}
+      shell: cd .. && mvn clean package 
+      register:  mvn_pkg_out
+    - debug:
+        var: mvn_pkg_out

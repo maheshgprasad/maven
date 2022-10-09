@@ -9,4 +9,4 @@
       shell: cd .. && mvn clean package 
       register:  mvn_pkg_out
     - debug:
-        var: mvn_pkg_out
+        var: mvn_pkg_out.stdout_lines

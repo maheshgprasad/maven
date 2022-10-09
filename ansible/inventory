@@ -1,0 +1,2 @@
+[tomcat_servers]
+APP_1 ansible_host=

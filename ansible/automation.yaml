@@ -1,0 +1,10 @@
+---
+- name: Application deployment automation
+  hosts: tomcat_servers
+  become: yes
+  become_user: ansible-user
+  gather_facts: false
+  tasks:
+    - name: 
+      shell: 
+      register:  

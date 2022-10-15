@@ -2,21 +2,50 @@
 - name: "deploy package to app server"
   hosts: tomcat_servers
   become: yes
-  become_user: ansible-user
-  gather_facts: false
+  gather_facts: yes
+  become_user: "ubuntu"
   tasks:
-    - name: "Stop Tomcat Server"
-      systemd: 
-        name: tomcat
-        state: stopped
-        enabled: true
-      tags: package_deploy
-    - name: "Deploy update to application"
-      shell: #rsync command to the exact location
-      tags: package_deploy
-    - name: "Restart tomcat server"
-      systemd:
-        name: tomcat
-        state: started
-        enabled: yes
-      tags: package_deploy
+    - name: "Tomcat Service Status"
+      command: "service tomcat status"
+      register: tc_status
+    - debug:
+        var: tc_status.stdout_lines
+    - name: "Tomcat Service Stop"
+      shell: "sudo service tomcat stop"
+    - name: "get current date"
+      set_fact: backup_date="{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+    - name: "Create Backup"
+      command: "sudo tar -cvzf /opt/tomcat/webapps/{{ backup_date }}.tar /opt/tomcat/webapps/ROOT/"
+      register: create_backup_archive
+    - debug:
+        var: create_backup_archive.stdout_lines
+    - name: "Move Backup to Tomcat Home"
+      shell: "sudo mv /opt/tomcat/webapps/{{ backup_date }}.tar /home/tomcat"
+    - name: "Wipe Tomcat Root"
+      shell: "sudo rm -rf /opt/tomcat/webapps/ROOT/*"
+    - name: "Create Temporary Directory"
+      shell: "mkdir -p /tmp/WAR_FILES"
+    - name: "Copy Content"
+      copy:
+        src: "/var/lib/jenkins/workspace/ansible-pipeline/target/application-01.war"
+        dest: "/tmp/WAR_FILES/"
+        force: no
+    - name: "Extract from Web Archive"
+      unarchive:
+        src: "/tmp/WAR_FILES/application-01.war"
+        dest: "/opt/tomcat/webapps/ROOT/"
+        remote_src: yes
+        mode: 0755
+        owner: "tomcat"
+        group: "tomcat"
+    - name: "Tomcat Service Start"
+      shell: "sudo service tomcat start"
+    - name: Delete remote war file
+      file:
+       path: "/tmp/WAR_FILES/"
+       state: absent
+    - name: "Final Status Check"
+      command: "service tomcat status"
+      register: tc_status_final
+    - debug:
+        var: tc_status_final.stdout_lines

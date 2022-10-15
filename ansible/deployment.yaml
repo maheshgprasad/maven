@@ -4,6 +4,9 @@
   become: yes
   gather_facts: yes
   become_user: "ubuntu"
+  vars:
+    tomcat_home: "/opt/tomcat"
+
   tasks:
     - name: "Tomcat Service Status"
       command: "service tomcat status"
@@ -19,17 +22,17 @@
       set_fact: backup_date="{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
 
     - name: "Create Backup"
-      command: "sudo tar -cvzf {{ tomcat.home }}/webapps/{{ backup_date }}.tar {{ tomcat.home }}/webapps/ROOT/"
+      command: "sudo tar -cvzf {{ tomcat_home }}/webapps/{{ backup_date }}.tar {{ tomcat_home }}/webapps/ROOT/"
       register: create_backup_archive
 
     - debug:
         var: create_backup_archive.stdout_lines
 
     - name: "Move Backup to Tomcat Home"
-      shell: "sudo mv {{ tomcat.home }}/webapps/{{ backup_date }}.tar /home/tomcat"
+      shell: "sudo mv {{ tomcat_home }}/webapps/{{ backup_date }}.tar /home/tomcat"
 
     - name: "Wipe Tomcat Root"
-      shell: "sudo rm -rf {{ tomcat.home }}/webapps/ROOT/*"
+      shell: "sudo rm -rf {{ tomcat_home }}/webapps/ROOT/*"
 
     - name: "Create Temporary Directory"
       shell: "mkdir -p /tmp/WAR_FILES"
@@ -52,7 +55,7 @@
         state: absent
 
     - name: "Deploy Web Application"
-      shell: "sudo cp -rp /tmp/WAR_FILES/* {{ tomcat.home }}/webapps/ROOT/"
+      shell: "sudo cp -rp /tmp/WAR_FILES/* {{ tomcat_home }}/webapps/ROOT/"
 
     - name: "Tomcat Service Start"
       shell: "sudo service tomcat start"

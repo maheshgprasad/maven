@@ -7,7 +7,4 @@
       "user": "ansible-user",
       "password": "P@ssw0rd"
     }',
-    "tomcat_home": "/opt/tomcat",
-    "application_name": "application.war",
-    "web_arch_location": "/var/lib/jenkins/workspace/ansible-pipeline/target"
   }

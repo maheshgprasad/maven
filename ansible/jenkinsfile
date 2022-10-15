@@ -7,15 +7,25 @@ pipeline {
                 checkout([$class: 'GitSCM', branches: [[name: '*/feature']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-token', url: 'https://github.com/maheshgprasad/maven.git/']]])
             }
         }
+        stage('Maven Compile') {
+            steps {
+                sh ''' mvn compile '''
+            }
+        }
         stage('Package Application') {
             steps {
                 sh ''' mvn clean package '''
             }
         }
-        stage(' Generate Report ') {
+        stage(' Generate Test Report ') {
             steps {
                 sh ''' mvn surefire-report:report '''
             }
         }
+        stage('Deploy Web App') {
+            steps {
+                ansiblePlaybook colorized: true, credentialsId: 'caltech', disableHostKeyChecking: true, inventory: 'ansible/inventory', playbook: 'ansible/deployment.yaml'
+            }
+        }        
     }
 }

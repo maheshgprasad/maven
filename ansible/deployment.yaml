@@ -17,9 +17,6 @@
     - debug:
         var: tc_status.stdout_lines
 
-    - name: "Tomcat Service Stop"
-      shell: "sudo service tomcat stop"
-
     - name: "Timestamp"
       set_fact: backup_date="{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
 
@@ -59,8 +56,8 @@
     - name: "Deploy Web Application"
       shell: "sudo cp -rp /tmp/WAR_FILES/* {{ tomcat_home }}/webapps/ROOT/"
 
-    - name: "Tomcat Service Start"
-      shell: "sudo service tomcat start"
+    - name: "Tomcat Service Restart"
+      shell: "sudo service tomcat restart"
 
     - name: "Remove Artifacts" 
       file:

@@ -6,6 +6,8 @@
   become_user: "ubuntu"
   vars:
     tomcat_home: "/opt/tomcat"
+    application_name: "application.war"
+    archive_location: "/var/lib/jenkins/workspace/ansible-pipeline/target/"
 
   tasks:
     - name: "Tomcat Service Status"
@@ -39,7 +41,7 @@
 
     - name: "Copy .war file from Jenkins Server"
       copy:
-        src: "{{ web_arch_location }}/{{ application_name }}"
+        src: {{ archive_location }}{{ application_name }}
         dest: "/tmp/WAR_FILES/"
         force: no
 

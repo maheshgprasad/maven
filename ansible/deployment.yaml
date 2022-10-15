@@ -25,19 +25,19 @@
       shell: "sudo rm -rf /opt/tomcat/webapps/ROOT/*"
     - name: "Create Temporary Directory"
       shell: "mkdir -p /tmp/WAR_FILES"
-    - name: "Copy Content"
+    - name: "Copy .war file from Jenkins Server"
       copy:
-        src: "/var/lib/jenkins/workspace/ansible-pipeline/target/application-01.war"
+        src: "/var/lib/jenkins/workspace/ansible-pipeline/target/application.war"
         dest: "/tmp/WAR_FILES/"
         force: no
-    - name: "Extract from Web Archive"
-      unarchive:
-        src: "/tmp/WAR_FILES/application-01.war"
-        dest: "/opt/tomcat/webapps/ROOT/"
-        remote_src: yes
-        mode: 0755
-        owner: "tomcat"
-        group: "tomcat"
+    - name: "Un Archive Application"
+      shell: "jar -xvf /tmp/WAR_FILES/application.war"
+    - name: "Remove WAR file"
+      file:
+        path: "/tmp/WAR_FILES/application.war"
+        state: absent
+    - name: "Deploy Web Application"
+      shell: "sudo cp -rp /tmp/WAR_FILES/* /opt/tomcat/webapps/ROOT/"
     - name: "Tomcat Service Start"
       shell: "sudo service tomcat start"
     - name: Delete remote war file

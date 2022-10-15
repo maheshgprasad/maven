@@ -1,2 +1,2 @@
 [tomcat_servers]
-APP_1 ansible_host="54.236.40.73"
+APP_1 ansible_host="54.158.158.62"

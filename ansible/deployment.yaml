@@ -31,7 +31,10 @@
         dest: "/tmp/WAR_FILES/"
         force: no
     - name: "Un Archive Application"
-      shell: "cd /tmp/ && jar -xvf application.war"
+      unarchive:
+        src: "/tmp/WAR_FILES/application.war"
+        dest: "/tmp/WAR_FILES/"
+        remote_src: yes
     - name: "Remove WAR file"
       file:
         path: "/tmp/WAR_FILES/application.war"

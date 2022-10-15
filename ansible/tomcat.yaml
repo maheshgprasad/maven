@@ -1,51 +1,45 @@
 ---
-- name: "Install Apache Tomcat Application"
+- name: "Install Apache Tomcat Server"
   hosts: tomcat_servers
   become: yes
   gather_facts: yes
-  become_user: "ubuntu"
+  become_user: ubuntu
   tasks:
     - name: "Apt Repo Update"
-      apt:
-        update_cache: yes
+      shell: "sudo apt update -y"
       register: apt_update
       ignore_errors: yes
-    
+
     - name: "Install JDK"
-      apt:
-        name: default-jdk
-        state: present
-    
+      shell: "sudo apt install default-jdk -y"
+
     - name: "Create System User for Tomcat"
-      shell: "useradd -m -d /opt/tomcat -U -s /bin/false tomcat" 
+      shell: "sudo useradd -m -d /opt/tomcat -U -s /bin/false tomcat"
 
     - name: "Download Latest Version of Apache Tomcat"
       shell: "wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.0.27/bin/apache-tomcat-10.0.27.tar.gz -O /tmp/tomcat-10.tar.gz"
-    
+
     - name: "Install Latest Version of Apache Tomcat"
       shell: "sudo -u tomcat tar -xzvf /tmp/tomcat-10.tar.gz --strip-components=1 -C /opt/tomcat"
-    
+
     - name: "Create Config File"
-      file:
-        path: "/etc/systemd.system/tomcat.service"
-        state: touch
-        mode: u+rwx,g-rwx,o-x
+      shell: "sudo touch /etc/systemd/system/tomcat.service"
 
     - name: "Download Apache Tomcat Systemd Config"
-      get_url:
-        url: "https://gist.githubusercontent.com/maheshgprasad/543e24150b7667486b52c52b08462ce5/raw/f4e5d4c2233fde640115e7cc1b14cfa77a1b14f9/tomcat.service"
-        dest: "/etc/systemd/system/tomcat.service" 
-    
+      shell: "wget https://gist.githubusercontent.com/maheshgprasad/543e24150b7667486b52c52b08462ce5/raw/f4e5d4c2233fde640115e7cc1b14cfa77a1b14f9/tomcat.service -O /tmp/tomcat.service"
+
+    - name: "Append Config"
+      shell: "sudo mv /tmp/tomcat.service /etc/systemd/system/tomcat.service"
+
     - name: "Reload Systemd Manage Configuration"
-      command: systemctl daemon-reload
+      shell: "sudo systemctl daemon-reload"
 
     - name: "Enable Tomcat at Boot"
-      command: "systemctl enable --now tomcat"
+      shell: "sudo systemctl enable --now tomcat"
 
     - name: "Check Service Status"
       shell: "service tomcat status"
       register: service_status
-    
+
     - debug:
         var: service_status.stdout_lines
-    

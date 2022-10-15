@@ -1,5 +1,5 @@
 ---
-- name: "deploy package to app server"
+- name: "Deploy Package to App Server"
   hosts: tomcat_servers
   become: yes
   gather_facts: yes
@@ -8,47 +8,63 @@
     - name: "Tomcat Service Status"
       command: "service tomcat status"
       register: tc_status
+
     - debug:
         var: tc_status.stdout_lines
+
     - name: "Tomcat Service Stop"
       shell: "sudo service tomcat stop"
-    - name: "get current date"
+
+    - name: "Timestamp"
       set_fact: backup_date="{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+
     - name: "Create Backup"
-      command: "sudo tar -cvzf /opt/tomcat/webapps/{{ backup_date }}.tar /opt/tomcat/webapps/ROOT/"
+      command: "sudo tar -cvzf {{ tomcat.home }}/webapps/{{ backup_date }}.tar {{ tomcat.home }}/webapps/ROOT/"
       register: create_backup_archive
+
     - debug:
         var: create_backup_archive.stdout_lines
+
     - name: "Move Backup to Tomcat Home"
-      shell: "sudo mv /opt/tomcat/webapps/{{ backup_date }}.tar /home/tomcat"
+      shell: "sudo mv {{ tomcat.home }}/webapps/{{ backup_date }}.tar /home/tomcat"
+
     - name: "Wipe Tomcat Root"
-      shell: "sudo rm -rf /opt/tomcat/webapps/ROOT/*"
+      shell: "sudo rm -rf {{ tomcat.home }}/webapps/ROOT/*"
+
     - name: "Create Temporary Directory"
       shell: "mkdir -p /tmp/WAR_FILES"
+
     - name: "Copy .war file from Jenkins Server"
       copy:
-        src: "/var/lib/jenkins/workspace/ansible-pipeline/target/application.war"
+        src: "{{ web_arch_location }}/{{ application_name }}"
         dest: "/tmp/WAR_FILES/"
         force: no
+
     - name: "Un Archive Application"
       unarchive:
-        src: "/tmp/WAR_FILES/application.war"
+        src: "/tmp/WAR_FILES/{{ application_name }}"
         dest: "/tmp/WAR_FILES/"
         remote_src: yes
+
     - name: "Remove WAR file"
       file:
-        path: "/tmp/WAR_FILES/application.war"
+        path: "/tmp/WAR_FILES/{{ application_name }}"
         state: absent
+
     - name: "Deploy Web Application"
-      shell: "sudo cp -rp /tmp/WAR_FILES/* /opt/tomcat/webapps/ROOT/"
+      shell: "sudo cp -rp /tmp/WAR_FILES/* {{ tomcat.home }}/webapps/ROOT/"
+
     - name: "Tomcat Service Start"
       shell: "sudo service tomcat start"
-    - name: Delete remote war file
+
+    - name: "Remove Artifacts" 
       file:
        path: "/tmp/WAR_FILES/"
        state: absent
+
     - name: "Final Status Check"
       command: "service tomcat status"
       register: tc_status_final
+
     - debug:
         var: tc_status_final.stdout_lines

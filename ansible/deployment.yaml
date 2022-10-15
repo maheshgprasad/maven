@@ -41,7 +41,7 @@
 
     - name: "Copy .war file from Jenkins Server"
       copy:
-        src: {{ archive_location }}{{ application_name }}
+        src: "{{ archive_location }}{{ application_name }}"
         dest: "/tmp/WAR_FILES/"
         force: no
 

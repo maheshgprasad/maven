@@ -31,7 +31,7 @@
         dest: "/tmp/WAR_FILES/"
         force: no
     - name: "Un Archive Application"
-      shell: "jar -xvf /tmp/WAR_FILES/application.war"
+      shell: "cd /tmp/ && jar -xvf application.war"
     - name: "Remove WAR file"
       file:
         path: "/tmp/WAR_FILES/application.war"

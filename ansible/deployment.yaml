@@ -1,0 +1,72 @@
+---
+- name: "Deploy Package to App Server"
+  hosts: tomcat_servers
+  become: yes
+  gather_facts: yes
+  become_user: "ubuntu"
+  vars:
+    tomcat_home: "/opt/tomcat"
+    application_name: "application.war"
+    archive_location: "/var/lib/jenkins/workspace/ansible-pipeline/target/"
+
+  tasks:
+    - name: "Tomcat Service Status"
+      command: "service tomcat status"
+      register: tc_status
+
+    - debug:
+        var: tc_status.stdout_lines
+
+    - name: "Timestamp"
+      set_fact: backup_date="{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+
+    - name: "Create Backup"
+      command: "sudo tar -cvzf {{ tomcat_home }}/webapps/{{ backup_date }}.tar {{ tomcat_home }}/webapps/ROOT/"
+      register: create_backup_archive
+
+    - debug:
+        var: create_backup_archive.stdout_lines
+
+    - name: "Move Backup to Tomcat Home"
+      shell: "sudo mv {{ tomcat_home }}/webapps/{{ backup_date }}.tar /home/tomcat"
+
+    - name: "Wipe Tomcat Root"
+      shell: "sudo rm -rf {{ tomcat_home }}/webapps/ROOT/*"
+
+    - name: "Create Temporary Directory"
+      shell: "mkdir -p /tmp/WAR_FILES"
+
+    - name: "Copy .war file from Jenkins Server"
+      copy:
+        src: "{{ archive_location }}{{ application_name }}"
+        dest: "/tmp/WAR_FILES/"
+        force: no
+
+    - name: "Un Archive Application"
+      unarchive:
+        src: "/tmp/WAR_FILES/{{ application_name }}"
+        dest: "/tmp/WAR_FILES/"
+        remote_src: yes
+
+    - name: "Remove WAR file"
+      file:
+        path: "/tmp/WAR_FILES/{{ application_name }}"
+        state: absent
+
+    - name: "Deploy Web Application"
+      shell: "sudo cp -rp /tmp/WAR_FILES/* {{ tomcat_home }}/webapps/ROOT/"
+
+    - name: "Tomcat Service Restart"
+      shell: "sudo service tomcat restart"
+
+    - name: "Remove Artifacts" 
+      file:
+       path: "/tmp/WAR_FILES/"
+       state: absent
+
+    - name: "Final Status Check"
+      command: "service tomcat status"
+      register: tc_status_final
+
+    - debug:
+        var: tc_status_final.stdout_lines

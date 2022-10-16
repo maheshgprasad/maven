@@ -1,0 +1,12 @@
+---
+- name: Application deployment automation
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: "Git Checkout"
+      
+    - name: "Package the application"
+      shell: cd .. && mvn clean package
+      register:  mvn_out
+    - debug:
+        var: mvn_out
